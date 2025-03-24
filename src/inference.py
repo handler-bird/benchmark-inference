@@ -48,7 +48,8 @@ def inference_streaming(strategy: str, model: str, prompt: str, device: str, bas
     time_total_generation_end = time.time() - time_total_generation_start
     time_per_token = time_total_generation_end / len(generated_list)
 
-    # Stop GPU monitoring
+    # Stop GPU monitoring and join inference thread to free up resources
+    thread.join()
     gpu.stop_measure()
 
     gpu_peak_memory = gpu.get_memory_usage(peak=True)
