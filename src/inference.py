@@ -1,3 +1,4 @@
+import unsloth
 from transformers import TextIteratorStreamer
 from threading import Thread
 from src.utils.load_model import LargeLanguageModel
