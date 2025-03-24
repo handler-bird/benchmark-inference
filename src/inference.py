@@ -1,12 +1,12 @@
 from transformers import TextIteratorStreamer
 from threading import Thread
 from src.utils.load_model import LargeLanguageModel
+from src.utils.functions import save_metrics
 import time
-import pandas as pd
 
 
-def standard_streaming(model: str, prompt: str, device: str, base_dir: str):
-    llm = LargeLanguageModel(model_path=model, device=device, standard=True)
+def inference_streaming(strategy: str, model: str, prompt: str, device: str, base_dir: str):
+    llm = LargeLanguageModel(model_path=model, device=device, strategy=strategy)
 
     streamer = TextIteratorStreamer(llm.tokenizer)
 
@@ -15,10 +15,10 @@ def standard_streaming(model: str, prompt: str, device: str, base_dir: str):
     generation_kwargs = {
         **inputs,
         "max_new_tokens": 50,
-        "temperature": 0.0,
         "do_sample": False,
         "streamer": streamer,
     }
+    
 
     thread = Thread(target=llm.model.generate, kwargs=generation_kwargs)
     thread.start()
@@ -37,20 +37,20 @@ def standard_streaming(model: str, prompt: str, device: str, base_dir: str):
         generated_list.append(new_text)
 
     time_total_generation_end = time.time() - time_total_generation_start
+    time_per_token = time_total_generation_end / len(generated_list)
 
     print("generated text:", generated_text)
     print("time for first token:", time_for_first_token_end)
     print("total time for text:", time_total_generation_end)
     print("time per token", time_total_generation_end / len(generated_list))
 
-    data = {
-        "model": [model],
-        "prompt": [prompt],
-        "output": [generated_text],
-        "time_to_first_token": [time_for_first_token_end],
-        "time_per_token": [time_total_generation_end / len(generated_list)],
-        "total_time": [time_total_generation_end],
-    }
-
-    df = pd.DataFrame(data)
-    df.to_csv(f"{base_dir}/metrics.csv", index=False)
+    save_dir = base_dir + '/metrics.csv'
+    save_metrics(
+        save_dir=save_dir,
+        model=model,
+        prompt=prompt,
+        output=generated_text,
+        time_to_first_token=time_for_first_token_end,
+        time_per_token=time_per_token,
+        total_time=time_total_generation_end
+    )

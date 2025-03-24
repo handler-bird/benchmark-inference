@@ -1,4 +1,3 @@
-from unsloth import FastLanguageModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 from vllm import LLM
@@ -9,16 +8,11 @@ class LargeLanguageModel:
         self,
         device: str,
         model_path: str = "microsoft/Phi-4-mini-instruct",
-        standard: bool = False,
-        bfloat16: bool = False,
-        quantization: bool = False,
-        flash_attn: bool = False,
-        vllm: bool = False,
-        unsloth: bool = False,
+        strategy: str = 'standard'
     ):
         torch.random.manual_seed(0)
 
-        if standard:
+        if strategy == 'standard':
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map="auto",
@@ -28,7 +22,7 @@ class LargeLanguageModel:
 
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-        if bfloat16:
+        if strategy == 'bfloat16':
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map="auto",
@@ -38,7 +32,7 @@ class LargeLanguageModel:
 
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-        if quantization:
+        if strategy == 'quantization':
             bnb_config = BitsAndBytesConfig(load_in_8bit=True)
 
             self.model = AutoModelForCausalLM.from_pretrained(
@@ -50,7 +44,7 @@ class LargeLanguageModel:
 
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-        if flash_attn:
+        if strategy == 'flash_attn':
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map="auto",
@@ -61,16 +55,17 @@ class LargeLanguageModel:
 
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-        if vllm:
+        if strategy == 'vllm':
             self.model = LLM(model=model_path, trust_remote_code=True)
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-        if unsloth:
-            paths = model_path.split("/")
-            model_path = "unsloth/" + paths[-1] + "-bnb-4bit"
+        if strategy == 'unsloth':
+            from unsloth import FastLanguageModel
 
+            paths = model_path.split("/")
+            model_path = "unsloth/" + paths[-1]
             self.model, self.tokenizer = FastLanguageModel.from_pretrained(
-                model_name=model_path, load_in_4bit=True, max_seq_length=8192
+                model_name=model_path, load_in_4bit=False, max_seq_length=8192, dtype=torch.float16
             )
 
-        self.model = self.model.to(device)
+            FastLanguageModel.for_inference(self.model)
