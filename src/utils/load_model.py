@@ -61,7 +61,7 @@ class LargeLanguageModel:
             from transformers import AutoTokenizer
 
             #TODO: https://docs.vllm.ai/en/latest/getting_started/troubleshooting.html#python-multiprocessing
-            self.model = vllm.LLM(model=model_path, trust_remote_code=True)
+            self.model = vllm.LLM(model=model_path, trust_remote_code=True, quantization="fp8")
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         if strategy == 'unsloth':
