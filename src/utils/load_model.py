@@ -1,7 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
-from vllm import LLM
-
 
 class LargeLanguageModel:
     def __init__(
@@ -13,6 +10,7 @@ class LargeLanguageModel:
         torch.random.manual_seed(0)
 
         if strategy == 'standard':
+            from transformers import AutoModelForCausalLM, AutoTokenizer
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map="auto",
@@ -23,6 +21,7 @@ class LargeLanguageModel:
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         if strategy == 'bfloat16':
+            from transformers import AutoModelForCausalLM, AutoTokenizer
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map="auto",
@@ -33,6 +32,7 @@ class LargeLanguageModel:
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         if strategy == 'quantization':
+            from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
             bnb_config = BitsAndBytesConfig(load_in_8bit=True)
 
             self.model = AutoModelForCausalLM.from_pretrained(
@@ -45,6 +45,7 @@ class LargeLanguageModel:
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         if strategy == 'flash_attn':
+            from transformers import AutoModelForCausalLM, AutoTokenizer
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_path,
                 device_map="auto",
@@ -56,10 +57,13 @@ class LargeLanguageModel:
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         if strategy == 'vllm':
+            from vllm import LLM
+            from transformers import AutoTokenizer
             self.model = LLM(model=model_path, trust_remote_code=True)
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         if strategy == 'unsloth':
+            import unsloth
             from unsloth import FastLanguageModel
 
             paths = model_path.split("/")

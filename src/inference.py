@@ -1,13 +1,16 @@
-import unsloth
-from transformers import TextIteratorStreamer
 from threading import Thread
 from src.utils.load_model import LargeLanguageModel
 from src.utils.functions import save_metrics
 import time
 from src.utils.gpu import GPU
 
-
 def inference_streaming(strategy: str, model: str, prompt: str, device: str, base_dir: str):
+    if strategy == "unsloth":
+        import unsloth
+        from transformers import TextIteratorStreamer
+    else:
+        from transformers import TextIteratorStreamer
+    
     # Start GPU monitoring
     gpu = GPU()
     gpu.start_measure()
