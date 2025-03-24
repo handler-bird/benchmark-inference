@@ -178,4 +178,5 @@ dependencies:
       - xxhash==3.5.0
       - yarl==1.18.3
       - zipp==3.21.0
+      - GPUtil== 1.4.0
 prefix: /home/v/van/miniconda3/envs/benchmark-inference

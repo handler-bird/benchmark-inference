@@ -3,9 +3,14 @@ from threading import Thread
 from src.utils.load_model import LargeLanguageModel
 from src.utils.functions import save_metrics
 import time
+from src.utils.gpu import GPU
 
 
 def inference_streaming(strategy: str, model: str, prompt: str, device: str, base_dir: str):
+    # Start GPU monitoring
+    gpu = GPU()
+    gpu.start_measure()
+
     llm = LargeLanguageModel(model_path=model, device=device, strategy=strategy)
 
     streamer = TextIteratorStreamer(llm.tokenizer)
@@ -18,7 +23,7 @@ def inference_streaming(strategy: str, model: str, prompt: str, device: str, bas
         "do_sample": False,
         "streamer": streamer,
     }
-    
+
 
     thread = Thread(target=llm.model.generate, kwargs=generation_kwargs)
     thread.start()
@@ -39,10 +44,20 @@ def inference_streaming(strategy: str, model: str, prompt: str, device: str, bas
     time_total_generation_end = time.time() - time_total_generation_start
     time_per_token = time_total_generation_end / len(generated_list)
 
+    # Stop GPU monitoring
+    gpu.stop_measure()
+
+    gpu_peak_memory = gpu.get_memory_usage(peak=True)
+    gpu_min_memory = gpu.get_memory_usage()
+    gpu_peak_utilization = gpu.get_utilization(peak=True)
+    gpu_min_utilization = gpu.get_utilization()
+
     print("generated text:", generated_text)
     print("time for first token:", time_for_first_token_end)
     print("total time for text:", time_total_generation_end)
     print("time per token", time_total_generation_end / len(generated_list))
+    print(f"GPU memory usage (min, max) in MB: ({gpu_min_memory}, {gpu_peak_memory})")
+    print(f"GPU utilization percentage (min, max): ({gpu_min_utilization}, {gpu_peak_utilization})")
 
     save_dir = base_dir + '/metrics.csv'
     save_metrics(
@@ -52,5 +67,9 @@ def inference_streaming(strategy: str, model: str, prompt: str, device: str, bas
         output=generated_text,
         time_to_first_token=time_for_first_token_end,
         time_per_token=time_per_token,
-        total_time=time_total_generation_end
+        total_time=time_total_generation_end,
+        gpu_min_memory=gpu_min_memory,
+        gpu_peak_memory=gpu_peak_memory,
+        gpu_min_utilization=gpu_min_utilization,
+        gpu_peak_utilization=gpu_peak_utilization
     )

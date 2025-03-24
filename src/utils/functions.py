@@ -40,6 +40,10 @@ def save_metrics(
     time_to_first_token: float,
     time_per_token: float,
     total_time: float,
+    gpu_min_memory: float,
+    gpu_peak_memory: float,
+    gpu_min_utilization: float,
+    gpu_peak_utilization: float
 ):
     if os.path.exists(save_dir):
         df = pd.read_csv(save_dir)
@@ -51,14 +55,18 @@ def save_metrics(
             time_to_first_token,
             time_per_token,
             total_time,
+            gpu_min_memory,
+            gpu_peak_memory,
+            gpu_min_utilization,
+            gpu_peak_utilization
         ]
 
         if len(df) == 5:
             mean_values = df[
-                ["time_to_first_token", "time_per_token", "total_time"]
+                ["time_to_first_token", "time_per_token", "total_time", "gpu_min_memory", "gpu_peak_memory", "gpu_min_utilization", "gpu_peak_utilization"]
             ].mean()
             std_values = df[
-                ["time_to_first_token", "time_per_token", "total_time"]
+                ["time_to_first_token", "time_per_token", "total_time", "gpu_min_memory", "gpu_peak_memory", "gpu_min_utilization", "gpu_peak_utilization"]
             ].std()
 
             df.loc[len(df)] = [
@@ -68,6 +76,10 @@ def save_metrics(
                 mean_values["time_to_first_token"],
                 mean_values["time_per_token"],
                 mean_values["total_time"],
+                mean_values["gpu_min_memory"],
+                mean_values["gpu_peak_memory"],
+                mean_values["gpu_min_utilization"],
+                mean_values["gpu_peak_utilization"]
             ]
             df.loc[len(df)] = [
                 "STD",
@@ -76,6 +88,10 @@ def save_metrics(
                 std_values["time_to_first_token"],
                 std_values["time_per_token"],
                 std_values["total_time"],
+                std_values["gpu_min_memory"],
+                std_values["gpu_peak_memory"],
+                std_values["gpu_min_utilization"],
+                std_values["gpu_peak_utilization"]
             ]
 
         df.to_csv(save_dir, index=False)
@@ -89,6 +105,10 @@ def save_metrics(
                 "time_to_first_token",
                 "time_per_token",
                 "total_time",
+                "gpu_min_memory",
+                "gpu_peak_memory",
+                "gpu_min_utilization",
+                "gpu_peak_utilization"
             ]
         )
         df.loc[0] = [
@@ -98,5 +118,9 @@ def save_metrics(
             time_to_first_token,
             time_per_token,
             total_time,
+            gpu_min_memory,
+            gpu_peak_memory,
+            gpu_min_utilization,
+            gpu_peak_utilization
         ]
         df.to_csv(save_dir, index=False)
