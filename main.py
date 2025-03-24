@@ -1,8 +1,25 @@
+#TODO: Remove the following lines after the issue is fixed
+#import os
+#os.environ["PYTHONPATH"] = os.getcwd() + ":" + os.environ.get("PYTHONPATH", "")
+#os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+# Force VLLM to use spawn method
+#os.environ["VLLM_USE_SPAWN"] = "1"
+# Disable VLLM using multiprocessing if possible
+#os.environ["VLLM_WORKERS"] = "1"
+# Force PyTorch to use spawn
+#os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"
+
+#TODO: Remove when fixed
+#import multiprocessing
+#multiprocessing.set_start_method('spawn', force=True)
+
 import argparse
 import torch
 from src.inference import inference_streaming
 from src.utils.functions import load_config
 
+#TODO: Remove when fixed
+#print(f"Multiprocessing start method: {multiprocessing.get_start_method()}")
 
 def main(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"

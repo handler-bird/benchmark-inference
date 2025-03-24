@@ -57,9 +57,11 @@ class LargeLanguageModel:
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         if strategy == 'vllm':
-            from vllm import LLM
+            import vllm
             from transformers import AutoTokenizer
-            self.model = LLM(model=model_path, trust_remote_code=True)
+
+            #TODO: https://docs.vllm.ai/en/latest/getting_started/troubleshooting.html#python-multiprocessing
+            self.model = vllm.LLM(model=model_path, trust_remote_code=True)
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
         if strategy == 'unsloth':
