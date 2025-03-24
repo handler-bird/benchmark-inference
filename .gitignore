@@ -172,3 +172,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# unsloth files
+unsloth_compiled_cache
+
+# data files
+/src/data

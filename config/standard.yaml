@@ -1,0 +1,4 @@
+run: 1
+model: 'microsoft/Phi-4-mini-instruct'
+prompt: 'An increasing sequence: one,'
+comment: 'standard run'
